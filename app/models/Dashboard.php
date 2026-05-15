@@ -31,10 +31,12 @@ class Dashboard {
     }
 
     public function getVentasSemana() {
-        $q = "SELECT date(fecha) as dia, COALESCE(SUM(total),0) as total, COUNT(*) as cantidad
-              FROM ventas WHERE estado = 1
-              AND date(fecha) >= date('now','localtime','-6 days')
-              GROUP BY date(fecha) ORDER BY dia ASC";
+        $q = "SELECT DATE(fecha) as dia, SUM(total) as total 
+            FROM ventas 
+            WHERE estado = 1 
+            AND DATE(fecha) >= CURRENT_DATE - INTERVAL '6 days'
+            GROUP BY DATE(fecha) 
+            ORDER BY DATE(fecha) ASC";
         $stmt = $this->conn->prepare($q);
         $stmt->execute();
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
