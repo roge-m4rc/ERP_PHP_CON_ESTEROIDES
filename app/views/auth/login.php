@@ -14,7 +14,7 @@
 <body>
 
 <div class="login-card">
-    <div class="brand-logo">👔 Macho's Ropa</div>
+    <div class="brand-logo">Sistema de control y ventas👔</div>
     <h5 class="text-center mb-4">Iniciar Sesión</h5>
     
     <?php if(isset($error)): ?>

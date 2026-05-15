@@ -10,13 +10,13 @@ class Dashboard {
 
     public function getVentasHoy() {
         $q = "SELECT COALESCE(SUM(total),0) as total FROM ventas 
-              WHERE date(fecha) = date('now','localtime') AND estado = 1";
+              WHERE DATE(fecha) = CURRENT_DATE AND estado = 1";
         return (float)$this->conn->query($q)->fetch(PDO::FETCH_ASSOC)['total'];
     }
 
     public function getTicketsHoy() {
         $q = "SELECT COUNT(*) as total FROM ventas 
-              WHERE date(fecha) = date('now','localtime') AND estado = 1";
+              WHERE DATE(fecha) = CURRENT_DATE AND estado = 1";
         return (int)$this->conn->query($q)->fetch(PDO::FETCH_ASSOC)['total'];
     }
 
