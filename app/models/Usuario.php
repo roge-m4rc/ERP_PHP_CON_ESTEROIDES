@@ -16,21 +16,33 @@ class Usuario {
     }
 
     public function login($usuario, $password) {
-        $query = "SELECT id_usuario, nombre, password, rol FROM " . $this->table_name . " WHERE usuario = :usuario AND estado = 1 LIMIT 1";
+        // Usamos comillas dobles en el nombre de la tabla por si acaso
+        $query = "SELECT id_usuario, nombre, password, rol FROM usuarios WHERE usuario = :usuario AND estado = 1 LIMIT 1";
         
-        $stmt = $this->conn->prepare($query);
-        $stmt->bindParam(':usuario', $usuario);
-        $stmt->execute();
+        try {
+            $stmt = $this->conn->prepare($query);
+            // Aseguramos que el usuario vaya en minúsculas por si acaso
+            $usuario_clean = strtolower(trim($usuario));
+            $stmt->bindParam(':usuario', $usuario_clean);
+            $stmt->execute();
 
-        $row = $stmt->fetch(PDO::FETCH_ASSOC);
+            $row = $stmt->fetch(PDO::FETCH_ASSOC);
 
-        if ($row) { 
-            if (password_verify($password, $row['password'])) {
-                $this->id_usuario = $row['id_usuario'];
-                $this->nombre = $row['nombre'];
-                $this->rol = $row['rol'];
-                return true;
+            if ($row) { 
+                // DEBUG: Si quieres estar 100% seguro, puedes descomentar la siguiente línea 
+                // para ver qué está llegando, pero solo para pruebas.
+                // die("Hash en BD: " . $row['password']); 
+
+                if (password_verify($password, $row['password'])) {
+                    $this->id_usuario = $row['id_usuario'];
+                    $this->nombre = $row['nombre'];
+                    $this->rol = $row['rol'];
+                    return true;
+                }
             }
+        } catch (PDOException $e) {
+            // Esto te dirá en los logs de Railway si la consulta SQL falló
+            error_log("Error en Login SQL: " . $e->getMessage());
         }
         
         return false;
