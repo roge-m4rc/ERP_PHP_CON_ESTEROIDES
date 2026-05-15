@@ -42,10 +42,19 @@ class Dashboard {
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
+    public function getVentasMes() {
+        $q = "SELECT SUM(total) as total 
+              FROM ventas 
+              WHERE estado = 1 
+              AND DATE(fecha) >= CURRENT_DATE - INTERVAL '30 days'";
+        return (float)$this->conn->query($q)->fetch(PDO::FETCH_ASSOC)['total'];
+    }
+
     public function getVentasRecientes($limite = 5) {
+        // CORRECCIÓN AQUÍ: DATE(v.fecha) = CURRENT_DATE
         $q = "SELECT v.*, u.nombre as vendedor 
               FROM ventas v JOIN usuarios u ON v.usuario_id = u.id_usuario
-              WHERE v.estado = 1 AND date(v.fecha) = date('now','localtime')
+              WHERE v.estado = 1 AND DATE(v.fecha) = CURRENT_DATE
               ORDER BY v.fecha DESC LIMIT :lim";
         $stmt = $this->conn->prepare($q);
         $stmt->bindParam(':lim', $limite, PDO::PARAM_INT);
