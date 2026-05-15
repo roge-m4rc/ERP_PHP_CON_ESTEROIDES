@@ -26,8 +26,8 @@ if (!$db) {
 }
 
 // Habilitar WAL mode para SQLite (mejor concurrencia)
-$db->exec("PRAGMA journal_mode=DELETE");
-$db->exec("PRAGMA foreign_keys=ON");
+//$db->exec("PRAGMA journal_mode=DELETE");
+//$db->exec("PRAGMA foreign_keys=ON");
 
 $route = isset($_GET['route']) ? trim($_GET['route']) : 'login';
 
