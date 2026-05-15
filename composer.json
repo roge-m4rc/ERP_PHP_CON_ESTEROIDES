@@ -3,6 +3,7 @@
         "greenter/greenter": "^5.2",
         "dompdf/dompdf": "^3.1",
         "ext-pdo_pgsql": "*",
-        "ext-pgsql": "*"
+        "ext-pgsql": "*",
+        "ext-curl": "*"
     }
 }

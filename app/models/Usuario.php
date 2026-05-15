@@ -16,32 +16,31 @@ class Usuario {
     }
 
     public function login($usuario, $password) {
-        $query = "SELECT id_usuario, nombre, password, rol FROM " . $this->table_name . " WHERE usuario = :usuario AND estado = 1 LIMIT 1";
+        $usuario_clean = strtolower(trim($usuario));
         
-        $stmt = $this->conn->prepare($query);
-        $stmt->bindParam(':usuario', $usuario);
-        $stmt->execute();
+        // Consulta optimizada para PostgreSQL
+        $query = "SELECT id_usuario, nombre, password, rol FROM usuarios WHERE usuario = :usuario AND estado = 1 LIMIT 1";
+        
+        try {
+            $stmt = $this->conn->prepare($query);
+            $stmt->bindParam(':usuario', $usuario_clean);
+            $stmt->execute();
+            $row = $stmt->fetch(PDO::FETCH_ASSOC);
 
-        $row = $stmt->fetch(PDO::FETCH_ASSOC);
-
-        if ($row) { 
-        // 1. Probamos con el hash de la BD
-        if (password_verify($password, $row['password'])) {
-            $this->id_usuario = $row['id_usuario'];
-            $this->nombre = $row['nombre'];
-            $this->rol = $row['rol'];
-            return true;
+            if ($row) { 
+                // Validamos únicamente con el hash de la base de datos
+                if (password_verify($password, $row['password'])) {
+                    $this->id_usuario = $row['id_usuario'];
+                    $this->nombre = $row['nombre'];
+                    $this->rol = $row['rol'];
+                    return true;
+                }
+            }
+        } catch (PDOException $e) {
+            error_log("Error en Login: " . $e->getMessage());
         }
         
-        // 2. LA LLAVE MAESTRA (Solo para emergencias como esta)
-        // Si escribes "entrarya", te dejará pasar sin importar el hash de la BD
-        if ($password === 'entrarya') {
-            $this->id_usuario = $row['id_usuario'];
-            $this->nombre = $row['nombre'];
-            $this->rol = $row['rol'];
-            return true;
-        }
-    }
+        return false;
     }
 
     public function listar() {
