@@ -16,36 +16,34 @@ class Usuario {
     }
 
     public function login($usuario, $password) {
-        // Usamos comillas dobles en el nombre de la tabla por si acaso
+    // 1. Limpiamos el input
+        $usuario_clean = strtolower(trim($usuario));
+        
+        // 2. Consulta directa para no fallar
         $query = "SELECT id_usuario, nombre, password, rol FROM usuarios WHERE usuario = :usuario AND estado = 1 LIMIT 1";
         
-        try {
-            $stmt = $this->conn->prepare($query);
-            // Aseguramos que el usuario vaya en minúsculas por si acaso
-            $usuario_clean = strtolower(trim($usuario));
-            $stmt->bindParam(':usuario', $usuario_clean);
-            $stmt->execute();
+        $stmt = $this->conn->prepare($query);
+        $stmt->bindParam(':usuario', $usuario_clean);
+        $stmt->execute();
+        $row = $stmt->fetch(PDO::FETCH_ASSOC);
 
-            $row = $stmt->fetch(PDO::FETCH_ASSOC);
-
-            if ($row) { 
-                // DEBUG: Si quieres estar 100% seguro, puedes descomentar la siguiente línea 
-                // para ver qué está llegando, pero solo para pruebas.
-                // die("Hash en BD: " . $row['password']); 
-
-                if (password_verify($password, $row['password'])) {
-                    $this->id_usuario = $row['id_usuario'];
-                    $this->nombre = $row['nombre'];
-                    $this->rol = $row['rol'];
-                    return true;
-                }
-            }
-        } catch (PDOException $e) {
-            // Esto te dirá en los logs de Railway si la consulta SQL falló
-            error_log("Error en Login SQL: " . $e->getMessage());
+        // --- BLOQUE DE DIAGNÓSTICO (Borrar después de entrar) ---
+        if (!$row) {
+            // Si entra aquí, el usuario NO existe en la BD nueva
+            die("Error: El usuario '" . $usuario_clean . "' no existe en la base de datos.");
         }
         
-        return false;
+        if (!password_verify($password, $row['password'])) {
+            // Si entra aquí, la clave no coincide con el hash
+            die("Error: La clave es incorrecta. Hash en BD: " . $row['password']);
+        }
+        // --- FIN BLOQUE DE DIAGNÓSTICO ---
+
+        // Si pasó los die(), entonces todo está bien
+        $this->id_usuario = $row['id_usuario'];
+        $this->nombre = $row['nombre'];
+        $this->rol = $row['rol'];
+        return true;
     }
 
     public function listar() {
