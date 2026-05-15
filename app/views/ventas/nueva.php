@@ -321,7 +321,7 @@
                                     <label class="small">Número</label>
                                     <div class="input-group input-group-sm">
                                         <input type="text" name="cliente_num_doc" id="cliente_num_doc" class="form-control" placeholder="00000000" value="-">
-                                        <button type="button" class="btn btn-primary" onclick="buscarCliente()">🔍</button>
+                                        <button type="button" id="btn_buscar_doc" class="btn btn-primary" onclick="buscarCliente()">🔍</button>
                                     </div>
                                 </div>
                             </div>

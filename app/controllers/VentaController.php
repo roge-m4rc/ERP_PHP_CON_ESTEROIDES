@@ -325,7 +325,7 @@ class VentaController {
         }
 
         // --- PASO B: Búsqueda Externa (API SUNAT/RENIEC) ---
-        $token = 'TU_TOKEN_AQUI'; // Regístrate en apis.net.pe para obtener uno
+        $token = 'sk_15529.c10Zj7HbAm9GcBCMfsPxZ4hbdHbjiY4J'; 
         $url = ($tipo === '1') 
             ? "https://api.apis.net.pe/v1/dni?numero=" . $documento 
             : "https://api.apis.net.pe/v1/ruc?numero=" . $documento;
@@ -334,7 +334,7 @@ class VentaController {
         curl_setopt($ch, CURLOPT_URL, $url);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
         curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false); 
-        // curl_setopt($ch, CURLOPT_HTTPHEADER, ['Authorization: Bearer ' . $token]); // Si usas token
+        curl_setopt($ch, CURLOPT_HTTPHEADER, ['Authorization: Bearer ' . $token]); // Si usas token
         $respuesta = curl_exec($ch);
         $http_status = curl_getinfo($ch, CURLINFO_HTTP_CODE);
         curl_close($ch);
@@ -345,15 +345,17 @@ class VentaController {
 
             // --- PASO C: Registro Automático ---
             // Guardamos al nuevo cliente para que la próxima vez sea una consulta LOCAL
-            try {
-                $ins = $this->db->prepare("INSERT INTO clientes (tipo_doc, num_doc, nombre) VALUES (:t, :n, :nom)");
-                $ins->execute([
-                    ':t' => $tipo,
-                    ':n' => $documento,
-                    ':nom' => $nombre
-                ]);
-            } catch (Exception $e) {
-                // Si ya existe por algún motivo, simplemente ignoramos el error de insert
+            if (!empty($nombre) && $nombre !== '-') { // Validamos que el nombre sea real
+                try {
+                    $ins = $this->db->prepare("INSERT INTO clientes (tipo_doc, num_doc, nombre) VALUES (:t, :n, :nom)");
+                    $ins->execute([
+                        ':t' => $tipo,
+                        ':n' => $documento,
+                        ':nom' => $nombre
+                    ]);
+                } catch (Exception $e) {
+                    // Ignorar si ya existe
+                }
             }
 
             echo json_encode([
