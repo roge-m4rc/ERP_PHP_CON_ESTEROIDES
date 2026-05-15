@@ -98,8 +98,8 @@ class ReporteController {
                             FROM detalle_ventas d
                             JOIN productos p ON d.producto_id = p.id
                             JOIN ventas v ON d.venta_id = v.id
-                            WHERE v.estado = 1 AND date(v.fecha) BETWEEN :f1 AND :f2
-                            GROUP BY d.producto_id
+                            WHERE v.estado = 1 AND DATE(v.fecha) BETWEEN :f1 AND :f2
+                            GROUP BY d.producto_id, p.nombre
                             ORDER BY total_vendido DESC
                             LIMIT 5";
         $stmtTop = $this->conn->prepare($sqlTopProductos);

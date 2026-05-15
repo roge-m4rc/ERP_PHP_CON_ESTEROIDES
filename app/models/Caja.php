@@ -23,7 +23,7 @@ class Caja {
         if ($existente) return false;
 
         $query = "INSERT INTO cajas (usuario_id, monto_inicial, estado, fecha_apertura) 
-                  VALUES (:uid, :monto, 1, datetime('now', 'localtime'))";
+                  VALUES (:uid, :monto, 1, CURRENT_TIMESTAMP)";
         $stmt = $this->conn->prepare($query);
         $stmt->bindParam(':uid', $usuario_id);
         $stmt->bindParam(':monto', $monto_inicial);
@@ -84,7 +84,7 @@ class Caja {
 
     public function cerrar($id_caja, $total_ventas, $monto_final) {
         $query = "UPDATE cajas 
-                  SET fecha_cierre = datetime('now', 'localtime'), 
+                  SET fecha_cierre = CURRENT_TIMESTAMP, 
                       monto_final  = :final,
                       total_ventas = :tv,
                       estado       = 0 
